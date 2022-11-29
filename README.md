@@ -8,6 +8,7 @@
 ## Informations générales
 ***
 Vous trouverez dans ce repository un package qui vous permettra d'installer prestashop en local  pour prestashop 1.7.8.x avec :
+
 * php 7.4-fpm
 * varnish
 * mysql 5.7
@@ -67,7 +68,7 @@ Dans la console artifakt on parle de jobs. Les plus utilisés sont:
 * **Deploy**: Redéploie les conteneurs (en cas de changement sur les variables par exemple)
 * **Build & deploy**: Reconstruction de l'image et redéploiement des conteneurs.
 
-Ce package donne accès en local au site sur **https://localhost** et au backoffice sur **https://localhost/admin_pylones**
+Ce package donne accès en local au site sur **https://localhost** et au backoffice sur **https://localhost/admin_base**
 * Adresse e-mail : pub@prestashop.com _(à modifier)_
 * Mot de passe : 0123456789 _(à modifier)_
  
