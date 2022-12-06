@@ -7,7 +7,8 @@
 
 ## Informations générales
 ***
-Vous trouverez dans ce repository un package qui vous permettra d'installer prestashop en local  pour prestashop 1.7.8.x avec :
+Vous trouverez dans ce repository un package qui vous permettra d'installer prestashop en local pour prestashop 1.7.8.7 avec :
+
 * php 7.4-fpm
 * varnish
 * mysql 5.7
@@ -18,9 +19,7 @@ Pour ce faire il suffit de prendre l'ensemble des dossiers/fichiers et de les d�
 
 Ce package est prévu pour fonctionner en local sur des architecture de type amd64 et/ou arm64 (puce M1 sur les Mac les plus récents).
 
-La version de base est configuré sur de l'amd64, plus étendue.
-
-Les commentaires laissés dans le docker-compose.yml sont assez clairs pour basculer sur de l'arm.
+La version de base (docker-compose.yml) est configuré sur de l'amd64, plus étendue.
 
 En ce qui concerne mysql et toujours dans un contexte local sur de l'arm64, il a fallu utiliser un repository custom afin de mettre en place la version 5.7 ([liupeng0518/mysql:5.7-arm64](https://hub.docker.com/layers/liupeng0518/mysql/5.7-arm64/images/sha256-2977a58e24e79d9bcb2153a6c0ff2fb66dce5a57fc3622663bf37c38c7fd6333?context=explore))
 
@@ -61,13 +60,18 @@ Les variables d'environnements sont accessibles. C'est le script **entrypoint.sh
 ***
 L'installation en local se lance par:
 ```
-docker-compose up --build  -d
+docker-compose up -d
 ```
+ou en arm
+```
+docker-compose -f docker-compose-arm.yml up -d 
+```
+
 Dans la console artifakt on parle de jobs. Les plus utilisés sont:
 * **Deploy**: Redéploie les conteneurs (en cas de changement sur les variables par exemple)
 * **Build & deploy**: Reconstruction de l'image et redéploiement des conteneurs.
 
-Ce package donne accès en local au site sur **https://localhost** et au backoffice sur **https://localhost/admin_pylones**
+Ce package donne accès en local au site sur **https://localhost** et au backoffice sur **https://localhost/admin_base**
 * Adresse e-mail : pub@prestashop.com _(à modifier)_
 * Mot de passe : 0123456789 _(à modifier)_
  
@@ -89,6 +93,7 @@ Le package se compose:
 * .gitignore
 * artifakt-custom-build-args
 * docker-compose.yml
+* docker-compose-arm.yml
 * Dockerfile
 * README.md  
 ## Commandes docker courantes
@@ -104,4 +109,3 @@ Le package se compose:
 | docker exec -t -i CONTAINER ID /bin/bash | Exécuter des commandes dans un conteneur actif |
 | docker inspect CONTAINER ID | Inspecter la configuration d'un conteneur |
 | docker logs -ft CONTAINER ID | Visualiser les logs d'un conteneur |
-

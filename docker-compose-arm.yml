@@ -1,0 +1,92 @@
+version: "3"
+
+volumes:
+  placeholder-data:
+  varnish-data:
+  varnish-conf:
+  nginxfpm-conf:
+  mysql-data:
+  app-code:
+  data:
+
+services:
+  proxy:
+    platform: linux/arm64
+    image: jwilder/nginx-proxy
+    container_name: system_nginx-proxy_1
+    restart: always
+    ports:
+      - "8000:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./.artifakt/etc/nginx-proxy/custom_proxy_settings.conf:/etc/nginx/conf.d/custom_proxy_settings.conf:ro
+      - ./.artifakt/apache/certs:/etc/nginx/certs
+
+  proxy-companion:
+    platform: linux/arm64
+    container_name: proxy-companion
+    image: registry.artifakt.io/nginx-proxy-companion:latest
+    restart: always
+    environment:
+      - "NGINX_PROXY_CONTAINER=system_nginx-proxy_1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./.artifakt/apache/certs:/etc/nginx/certs
+
+  varnish:
+    platform: linux/arm64
+    image: registry.artifakt.io/varnish:6.6
+    container_name: varnish
+    volumes:
+      - ./.artifakt/etc/varnish/default.vcl:/etc/varnish/default.vcl:ro
+      - varnish-data:/var/lib/varnish
+      - varnish-conf:/etc/varnish/conf.d
+    ports:
+      - "8888:80"
+    environment:
+      - VIRTUAL_HOST= localhost
+      - SELF_SIGNED_HOST= localhost
+    restart: always
+
+  nginx:
+    platform: linux/arm64
+    image: registry.artifakt.io/nginx-fpm:1.21
+    container_name: nginx
+    volumes:
+      # - ./:/var/www/html:rw
+      - app-code:/var/www/code
+      - data:/data:ro
+      - ./.artifakt/etc/nginx/default.conf:/etc/nginx/nginx.conf:ro
+      - nginxfpm-conf:/etc/nginx/conf.d
+    env_file:
+      - ./.env
+
+  app:
+    build: .
+    container_name: app
+    env_file:
+      - ./.env
+    volumes:
+      # - ./:/var/www/html:rw
+      - "./data:/data"
+      - varnish-conf:/conf/varnish
+      - nginxfpm-conf:/conf/nginxfpm
+      - app-code:/var/www/code
+    restart: always
+    expose:
+      - 9000
+
+  mysql:
+    platform: linux/arm64
+    image: liupeng0518/mysql:5.7-arm64
+    restart: always
+    volumes:
+      - ./.artifakt/etc/mysql/mysqld.cnf:/etc/mysql/conf.d/mysqld.cnf:ro
+      - mysql-data:/var/lib/mysql:rw
+      #- ./share:/tmp/share
+    env_file:
+      - .env
+    ports:
+      - "3306:3306"
+    container_name: mysql

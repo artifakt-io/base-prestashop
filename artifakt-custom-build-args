@@ -1,0 +1,2 @@
+export ARTIFAKT_COMPOSER_VERSION="2.3.7"
+export PRESTASHOP_ADMIN_PATH="admin_base"
