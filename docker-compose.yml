@@ -85,3 +85,12 @@ services:
     ports:
       - "3306:3306"
     container_name: mysql
+  redis:
+    image: redis:6.0-alpine
+    container_name: redis
+    restart: always
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./.artifakt/etc/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    ports:
+      - "6379:6379"
