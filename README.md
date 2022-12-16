@@ -85,6 +85,7 @@ Le package se compose:
         * nginx 
         * nginx-proxy
         * php
+        * redis
         * varnish 
     * build.sh
     * composer_setup.sh
