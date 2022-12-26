@@ -137,6 +137,7 @@ sub vcl_recv {
         return (pass);
     }
 
+
     #we should not cache any custom directory
     if (req.method == "GET" && (req.url ~ "^/custom")) {
         return (pass);
