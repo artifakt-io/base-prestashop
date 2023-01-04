@@ -24,6 +24,8 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./.artifakt/etc/nginx-proxy/custom_proxy_settings.conf:/etc/nginx/conf.d/custom_proxy_settings.conf:ro
       - ./.artifakt/apache/certs:/etc/nginx/certs
+    networks:
+      - app
 
   proxy-companion:
     platform: linux/arm64
@@ -35,6 +37,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./.artifakt/apache/certs:/etc/nginx/certs
+    networks:
+      - app
 
   varnish:
     platform: linux/arm64
@@ -50,6 +54,8 @@ services:
       - VIRTUAL_HOST= localhost
       - SELF_SIGNED_HOST= localhost
     restart: always
+    networks:
+      - app
 
   nginx:
     platform: linux/arm64
@@ -63,6 +69,9 @@ services:
       - nginxfpm-conf:/etc/nginx/conf.d
     env_file:
       - ./.env
+    networks:
+      - nginx
+      - app
 
   app:
     build: .
@@ -78,6 +87,8 @@ services:
     restart: always
     expose:
       - 9000
+    networks:
+      - app
 
   mysql:
     platform: linux/arm64
@@ -92,6 +103,8 @@ services:
     ports:
       - "3306:3306"
     container_name: mysql
+    networks:
+      - app
 
   redis:
     platform: linux/arm64
@@ -103,6 +116,8 @@ services:
       - ./.artifakt/etc/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
     ports:
       - "6379:6379"
+    networks:
+      - app
 
   prometheus:
     image: prom/prometheus:latest
@@ -115,19 +130,6 @@ services:
       - "--config.file=/etc/prometheus/prometheus.yml"
     ports:
       - "9090:9090"
-    networks:
-      - monitoring
-
-  alertmanager:
-    image: prom/alertmanager
-    ports:
-      - "9093:9093"
-    container_name: alertmanager
-    restart: always
-    volumes:
-      - "./.artifakt/etc/alertmanager/:/etc/alertmanager/"
-    command:
-      - "--config.file=/etc/alertmanager/config.yml"
     networks:
       - monitoring
 
@@ -149,12 +151,16 @@ services:
       - monitoring
 
   nginx-exporter:
-    image: fish/nginx-exporter
-    container_name: "nginx_exporter"
+    platform: linux/arm64
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: "nginx-exporter"
     command:
-      - "-nginx.scrape_uri=http://localhost:8000/stub_status"
+      - "-nginx.scrape_uri=http://nginx:8080/metrics"
     ports:
       - "9113:9113"
+    networks:
+      - nginx
+      - monitoring
   grafana:
     image: grafana/grafana
     depends_on:
@@ -171,21 +177,10 @@ services:
     networks:
       - monitoring
 
-  # cadvisor:
-  #   # TODO: latest tag is not updated, check latest release https://github.com/google/cadvisor/releases
-  #   image: gcr.io/cadvisor/cadvisor:v0.46.0
-  #   container_name: cadvisor
-  #   ports:
-  #     - "8484:8484"
-  #   volumes:
-  #     - /:/rootfs:ro
-  #     - /var/run:/var/run:ro
-  #     - /sys:/sys:ro
-  #     - /var/lib/docker/:/var/lib/docker:ro
-  #     - /dev/disk/:/dev/disk:ro
-  #   devices:
-  #     - /dev/kmsg
-
 networks:
   monitoring:
     name: monitorisme
+  app:
+    name: happisme
+  nginx:
+    name: nginxisme
