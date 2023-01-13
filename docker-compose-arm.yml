@@ -178,17 +178,17 @@ services:
       - monitoring
 
   #https://hub.docker.com/r/nginx/nginx-prometheus-exporter
-  nginx-exporter:
-    platform: linux/arm64
-    image: nginx/nginx-prometheus-exporter:latest
-    container_name: "nginx-exporter"
-    command:
-      - "-nginx.scrape-uri=http://nginx:8080/stub_status"
-    ports:
-      - "9113:9113"
-    networks:
-      - monitoring
-      - nginx
+  # nginx-exporter:
+  #   platform: linux/arm64
+  #   image: nginx/nginx-prometheus-exporter:latest
+  #   container_name: "nginx-exporter"
+  #   command:
+  #     - "-nginx.scrape-uri=http://nginx:8080/stub_status"
+  #   ports:
+  #     - "9113:9113"
+  #   networks:
+  #     - monitoring
+  #     - nginx
   mysql-exporter:
     image: prom/mysqld-exporter
     container_name: mysql-exporter
