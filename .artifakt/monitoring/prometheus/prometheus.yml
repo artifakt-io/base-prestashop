@@ -7,24 +7,23 @@ scrape_configs:
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090'] # prometheus monitoring itself
-      - targets: ['host.docker.internal:9323']
-
+      # - targets: ['host.docker.internal:9323'] / Uncomment if your want to work localy
 
   - job_name: 'node-exporter'
     static_configs:
       - targets: ['node-exporter:9100'] # monitoring node exporter of prometheus node
 
-  - job_name: 'NginxExporter'
-    metrics_path: '/metrics'    
-    static_configs:
-      - targets: ['nginx-exporter:9113']
+  # - job_name: 'NginxExporter'
+  #   metrics_path: '/metrics'    
+  #   static_configs:
+  #     - targets: ['nginx-exporter:9113']
 
   - job_name: 'Mysql exporter'
     static_configs:
     - targets: ['mysql-exporter:9104']
 
-  - job_name: cadvisor
-    static_configs:
-      - targets: ['cadvisor:8080'] 
-        labels:
-          alias: "cadvisor"
+  # - job_name: cadvisor
+  #   static_configs:
+  #     - targets: ['cadvisor:8080'] 
+  #       labels:
+  #         alias: "cadvisor"
