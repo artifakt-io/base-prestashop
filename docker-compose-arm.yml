@@ -12,6 +12,12 @@ volumes:
   prometheus-data:
 
 services:
+  #      _                _ _           _   _
+  #     / \   _ __  _ __ | (_) ___ __ _| |_(_) ___  _ __
+  #    / _ \ | '_ \| '_ \| | |/ __/ _` | __| |/ _ \| '_ \
+  #   / ___ \| |_) | |_) | | | (_| (_| | |_| | (_) | | | |
+  #  /_/   \_\ .__/| .__/|_|_|\___\__,_|\__|_|\___/|_| |_|
+  #          |_|   |_|
   proxy:
     platform: linux/arm64
     image: jwilder/nginx-proxy
@@ -26,6 +32,7 @@ services:
       - ./.artifakt/apache/certs:/etc/nginx/certs
     networks:
       - app
+      - nginx
 
   proxy-companion:
     platform: linux/arm64
@@ -39,6 +46,7 @@ services:
       - ./.artifakt/apache/certs:/etc/nginx/certs
     networks:
       - app
+      - nginx
 
   varnish:
     platform: linux/arm64
@@ -72,7 +80,6 @@ services:
     networks:
       - nginx
       - app
-
   app:
     build: .
     container_name: app
@@ -89,7 +96,6 @@ services:
       - 9000
     networks:
       - app
-
   mysql:
     platform: linux/arm64
     image: liupeng0518/mysql:5.7-arm64
@@ -105,7 +111,6 @@ services:
     container_name: mysql
     networks:
       - app
-
   redis:
     platform: linux/arm64
     image: redis:6.0-alpine
@@ -119,11 +124,17 @@ services:
     networks:
       - app
 
+  #   __  __             _ _             _
+  #  |  \/  | ___  _ __ (_) |_ ___  _ __(_)_ __   __ _
+  #  | |\/| |/ _ \| '_ \| | __/ _ \| '__| | '_ \ / _` |
+  #  | |  | | (_) | | | | | || (_) | |  | | | | | (_| |
+  #  |_|  |_|\___/|_| |_|_|\__\___/|_|  |_|_| |_|\__, |
+  #                                              |___/
   prometheus:
     image: prom/prometheus:latest
     container_name: "prometheus"
     volumes:
-      - ./.artifakt/etc/prometheus:/etc/prometheus
+      - ./.artifakt/monitoring/prometheus:/etc/prometheus
       - prometheus-data:/prometheus
     restart: unless-stopped
     command:
@@ -132,7 +143,23 @@ services:
       - "9090:9090"
     networks:
       - monitoring
-
+  grafana:
+    image: grafana/grafana
+    hostname: grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    volumes:
+      - "grafana_data:/var/lib/grafana"
+      - ./.artifakt/monitoring/grafana/provisioning/:/etc/grafana/provisioning/
+      - ./.artifakt/monitoring/grafana/grafana.ini:/etc/grafana/config.ini
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=bruno.pinchede@artifakt.io
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - monitoring
   node-exporter:
     image: quay.io/prometheus/node-exporter:latest
     container_name: node-exporter
@@ -150,37 +177,64 @@ services:
     networks:
       - monitoring
 
+  #https://hub.docker.com/r/nginx/nginx-prometheus-exporter
   nginx-exporter:
     platform: linux/arm64
     image: nginx/nginx-prometheus-exporter:latest
     container_name: "nginx-exporter"
     command:
-      - "-nginx.scrape_uri=http://nginx:8080/metrics"
+      - "-nginx.scrape-uri=http://nginx:8080/stub_status"
     ports:
       - "9113:9113"
     networks:
-      - nginx
       - monitoring
-  grafana:
-    image: grafana/grafana
-    depends_on:
-      - prometheus
-    ports:
-      - "3000:3000"
-    volumes:
-      - "grafana_data:/var/lib/grafana"
-      - ./.artifakt/etc/grafana:/etc/grafana/provisioning/datasources
-    container_name: grafana
+      - nginx
+  mysql-exporter:
+    image: prom/mysqld-exporter
+    container_name: mysql-exporter
     environment:
-      - GF_SECURITY_ADMIN_USER=bruno.pinchede@artifakt.io
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - DATA_SOURCE_NAME=prestashopuser:prestashop@(mysql:3306)/prestashop
+      - collect.info_schema.tablestats=true
+      - collect.info_schema.userstats=true
+      - collect.info_schema.query_response_time=true
+      - collect.auto_increment.columns=true
+      - collect.binlog_size=true
+      - collect.perf_schema.eventsstatements=true
+      - collect.perf_schema.eventswaits=true
+      - collect.perf_schema.file_events=true
+      - collect.perf_schema.indexiowaits=true
+      - collect.perf_schema.tableiowaits=true
+      - collect.perf_schema.tablelocks=true
+    ports:
+      - 9104:9104
+    depends_on:
+      - mysql
+    volumes:
+      - ./.artifakt/mysql-exporter/.my.cnf:/root/.my.cnf
+    networks:
+      - monitoring
+      - app
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.46.0
+    container_name: cadvisor
+    ports:
+      - "8084:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
     networks:
       - monitoring
 
 networks:
   monitoring:
-    name: monitorisme
+    name: monitoring
   app:
-    name: happisme
+    name: application
   nginx:
-    name: nginxisme
+    name: nginx
