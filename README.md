@@ -73,7 +73,7 @@ Dans la console artifakt on parle de jobs. Les plus utilisés sont:
 * **Deploy**: Redéploie les conteneurs (en cas de changement sur les variables par exemple)
 * **Build & deploy**: Reconstruction de l'image et redéploiement des conteneurs.
 
-Ce package donne accès en local au site sur **https://localhost** et au backoffice sur **https://localhost/admin_base** si la variable PRESTASHOP_ADMIN_PATH dans .env est conservée. Si vous décidez de là commenter le BO sera accessible sur **https://localhost/admin-dev**
+Ce package donne accès en local au site sur **https://localhost** et au backoffice sur **https://localhost/admin_base** 
 * Adresse e-mail : pub@prestashop.com _(à modifier)_
 * Mot de passe : 0123456789 _(à modifier)_
  
@@ -103,7 +103,7 @@ Le package se compose:
 ## Clean Reinstall
 ***
 Si vous voulez réinitialiser l'installation, il suffit de renseigner la variables PRESTASHOP_CLEAN_REINSTALL=1 soit:
-* Dans le fichier .enc en local
+* Dans le fichier .env en local
 * Dans la console artifakt au moment d'un build and deploy.
 <span style="color: #FF0000">Attention cette variable doit être temporaire et uniquement pour un job donné.</span> 
 
