@@ -3,7 +3,9 @@
 2. [Workflow](#workflow)
 3. [Installation](#installation)
 4. [Package Artifakt](#package-artifakt)
-5. [Commandes docker courantes](#commandes-docker-courantes)
+5. [Clean Reinstall](#clean-reinstall)
+6. [Variables](#variables)
+7. [Commandes docker courantes](#commandes-docker-courantes)
 
 ## Informations générales
 ***
@@ -71,7 +73,7 @@ Dans la console artifakt on parle de jobs. Les plus utilisés sont:
 * **Deploy**: Redéploie les conteneurs (en cas de changement sur les variables par exemple)
 * **Build & deploy**: Reconstruction de l'image et redéploiement des conteneurs.
 
-Ce package donne accès en local au site sur **https://localhost** et au backoffice sur **https://localhost/admin_base**
+Ce package donne accès en local au site sur **https://localhost** et au backoffice sur **https://localhost/admin_base** si la variable PRESTASHOP_ADMIN_PATH dans .env est conservée. Si vous décidez de là commenter le BO sera accessible sur **https://localhost/admin-dev**
 * Adresse e-mail : pub@prestashop.com _(à modifier)_
 * Mot de passe : 0123456789 _(à modifier)_
  
@@ -90,6 +92,7 @@ Le package se compose:
     * build.sh
     * composer_setup.sh
     * entrypoint.sh
+    * clean_reinstall.sh
 * .dockerignore
 * .gitignore
 * artifakt-custom-build-args
@@ -97,6 +100,27 @@ Le package se compose:
 * docker-compose-arm.yml
 * Dockerfile
 * README.md  
+## Clean Reinstall
+***
+Si vous voulez réinitialiser l'installation, il suffit de renseigner la variables PRESTASHOP_CLEAN_REINSTALL=1 soit:
+* Dans le fichier .enc en local
+* Dans la console artifakt au moment d'un build and deploy.
+<span style="color: #FF0000">Attention cette variable doit être temporaire et uniquement pour un job donné.</span> 
+
+## Variables
+***
+| Variables | Description |
+|:--------------|:-------------|
+| LOCAL_INSTALL | Actions spécifiques au dev local |
+| <span style="color: #FF0000">PRESTASHOP_VERSION</span>  | Version de prestashop (obligatoire)|
+| <span style="color: #FF0000">PRESTASHOP_SERVER_DOMAIN</span> | Renseignement du domaine (obligatoire) |
+| <span style="color: #26B260">PRESTASHOP_PROJECT_NAME</span> | Nom du projet (obligatoire au setup) |
+| PRESTASHOP_CLEAN_REINSTALL | Réinstallation du projet |
+| <span style="color: #FF0000">ARTIFAKT_COMPOSER_VERSION</span> | (obligatoire) |
+| PRESTASHOP_ADMIN_PATH | Valeure par défaut : admin_base (obligatoire au setup)  |
+
+```
+```
 ## Commandes docker courantes
 ***
 

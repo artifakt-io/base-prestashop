@@ -1,9 +1,22 @@
 #!/bin/bash
 [ "$DEBUG" = "true" ] && set -x
 
+if [ -n "$APP_ROOT_PATH_DEFINED" ];then
+   export APP_ROOT_PATH_DEFINED="$APP_ROOT_PATH_DEFINED"
+else 
+   export APP_ROOT_PATH_DEFINED="/var/www/code"
+fi
+
+echo "######################################################"
+echo "##### Root Path: $APP_ROOT_PATH_DEFINED"
+
+    if [ -z "$PRESTASHOP_CLEAN_REINSTALL" ]; then
+        export PRESTASHOP_CLEAN_REINSTALL=0
+    fi
+
 echo "######################################################"
 echo "##### Server Domain "
-if [ -n "$PRESTASHOP_SERVER_DOMAIN" ]; then server_domain="$PRESTASHOP_SERVER_DOMAIN"; else server_domain="localhost"; fi
+    if [ -n "$PRESTASHOP_SERVER_DOMAIN" ]; then server_domain="$PRESTASHOP_SERVER_DOMAIN"; else server_domain="localhost"; fi
 echo -e "Server domain is $server_domain\n"
 
 configuration_table_name="configuration";
@@ -23,7 +36,6 @@ if [ -z "$LOCAL_INSTALL" ];then
     echo "Varnish: Copy default.vcl in /conf/varnish mount folder."
     echo "nginx: Copy default.conf in /conf/nginx mount folder."
     echo "######################################################"
-
         cp -f /.artifakt/etc/varnish/default.vcl /conf/varnish/default.vcl || echo "No config default.vcl"
         cp -f /.artifakt/etc/nginx/default.conf /conf/nginxfpm/default.conf || echo "No config default.conf"
 fi
@@ -34,6 +46,13 @@ while ! mysqladmin ping -h"$ARTIFAKT_MYSQL_HOST" --silent; do
     echo "Waiting for db..."
     sleep 1
 done
+
+if [ "$PRESTASHOP_CLEAN_REINSTALL" -eq 1 ]; then
+    echo "######################################################"
+    echo "##### Prestashop Clean ReInstall"
+    echo "######################################################"
+    sh /.artifakt/clean_reinstall.sh
+fi    
 
 if [ -n "$LOCAL_INSTALL" ]; then
     echo "######################################################"
@@ -53,25 +72,42 @@ else
     echo "No needs to create user."
 fi
 
-if [ ! -d "/var/www/code/$PRESTASHOP_ADMIN_PATH" ]; then
-    echo "######################################################"
-    echo "##### Prestashop import"
-    echo "##### Prestashop version $PRESTASHOP_VERSION"
-    echo "######################################################"
-    echo "##### Prestashop import"
+echo "##### Current BO path #####"
+    export CURRENT_ADMIN_PATH;
+    CURRENT_ADMIN_PATH=$(find "$APP_ROOT_PATH_DEFINED" -type d -iname 'backups' | cut -d "/" -f5);
 
-        cd /tmp && \
-        wget https://download.prestashop.com/download/releases/prestashop_"$PRESTASHOP_VERSION".zip -q --show-progress && \
-        unzip -qq prestashop_*.zip && \
-        echo "### Unzip Prestashop zip in /var/www/code"
-        unzip -qq prestashop.zip -d /var/www/code && \
-        rm /tmp/*.zip  /tmp/index.php /tmp/Install_PrestaShop.html
+if [ -z "$PRESTASHOP_ADMIN_PATH" ]; then
+    PRESTASHOP_ADMIN_PATH="admin_base"
+fi
 
-    echo "######################################################"
-    echo "##### PRESTASHOP PERMISSIONS"
+if [ ! -d "$APP_ROOT_PATH_DEFINED/$PRESTASHOP_ADMIN_PATH" ]; then
+    echo "##### Current adminPathRoot is empty."
+    echo "##### Variable PRESTASHOP_ADMIN_PATH: $PRESTASHOP_ADMIN_PATH"
 
-        chown -R www-data:www-data /var/www/code/
-        chmod -R 755 /var/www/code/   
+    if [ -z "$CURRENT_ADMIN_PATH" ]; then
+
+        echo "######################################################"
+        echo "##### Prestashop import"
+        echo "##### Prestashop version $PRESTASHOP_VERSION"
+        echo "######################################################"
+        echo "##### Prestashop import"
+
+            cd /tmp && \
+            wget -N https://download.prestashop.com/download/releases/prestashop_"$PRESTASHOP_VERSION".zip -q && \
+            unzip -qq prestashop_*.zip && \
+            echo "### Unzip Prestashop zip in $APP_ROOT_PATH_DEFINED"
+            unzip -qq prestashop.zip -d "$APP_ROOT_PATH_DEFINED" && \
+            rm /tmp/*.zip  /tmp/index.php /tmp/Install_PrestaShop.html
+
+        echo "######################################################"
+        echo "##### PRESTASHOP PERMISSIONS"
+
+            chown -R www-data:www-data "$APP_ROOT_PATH_DEFINED"
+            chmod -R 755 "$APP_ROOT_PATH_DEFINED"   
+
+    else
+        echo "CURRENT_ADMIN_PATH is not equal to PRESTASHOP_ADMIN_PATH but back-office is already installed"
+    fi
 else
     echo "Prestashop import is already done."
 fi
@@ -83,12 +119,11 @@ if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
 
     if [ "$tableCount" -eq 0 ]; then
 
-        if [ -d "/var/www/code/install" ]; then
+        if [ -d "$APP_ROOT_PATH_DEFINED/install" ]; then
             echo "######################################################"
             echo "##### PRESTASHOP CONFIGURATION"
             echo "######################################################"
-
-                cd /var/www/code/install || exit
+                cd "$APP_ROOT_PATH_DEFINED"/install || exit
                 su www-data -s /bin/bash -c "php index_cli.php --step=all --domain=$server_domain --db_server=$ARTIFAKT_MYSQL_HOST --db_name=$ARTIFAKT_MYSQL_DATABASE_NAME --db_user=$ARTIFAKT_MYSQL_USER --db_password=$ARTIFAKT_MYSQL_PASSWORD --language=fr --prefix=$prefix --name=$PRESTASHOP_PROJECT_NAME"  
             
             echo "######################################################"
@@ -98,7 +133,7 @@ if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
                 if [  "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
                     configuration_table_name="$ARTIFAKT_MYSQL_DATABASE_PREFIX"_configuration;
                     mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME" -e "UPDATE $configuration_table_name SET value = '1' WHERE name = 'PS_SSL_ENABLED';"
-                    mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME"  -e "UPDATE $configuration_table_name SET value = '1' WHERE name = 'PS_SSL_ENABLED_EVERYWHERE';"
+                    mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME" -e "UPDATE $configuration_table_name SET value = '1' WHERE name = 'PS_SSL_ENABLED_EVERYWHERE';"
                 fi
         else 
             echo "Database is empty and there is no install folder. Please check."
@@ -118,26 +153,36 @@ if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
     fi    
 fi
 
-if [ -d "/var/www/code/install" ]; then
+if [ -d "$APP_ROOT_PATH_DEFINED/install" ]; then
     echo "### Remove install folder"
-    rm -rf /var/www/code/install
+    rm -rf "$APP_ROOT_PATH_DEFINED"/install
 fi
 
-
-
-if [ -d "/var/www/code/admin" ]; then
+if [ -d "$APP_ROOT_PATH_DEFINED/admin" ]; then
     echo "###############################################################"
     echo "##### ADMIN FOLDER NAME CHANGE: admin to $PRESTASHOP_ADMIN_PATH"
 
-        cd /var/www/code || exit
+        cd "$APP_ROOT_PATH_DEFINED" || exit
         mv admin "$PRESTASHOP_ADMIN_PATH"
 fi
+ 
+
+# TO work again in order to change just with a deploy
+# CURRENT_ADMIN_PATH=$(find "$APP_ROOT_PATH_DEFINED" -type d -iname 'backups' | cut -d "/" -f5);
+
+# if [[ "$CURRENT_ADMIN_PATH" != "$PRESTASHOP_ADMIN_PATH" && -n "$PRESTASHOP_ADMIN_PATH" ]]; then
+#     echo "###############################################################"
+#     echo "##### CURRENT ADMIN FOLDER NAME is: $CURRENT_ADMIN_PATH"
+#     echo "##### NEW ADMIN FOLDER PATH is going to change by : $PRESTASHOP_ADMIN_PATH"
+#         cd "$APP_ROOT_PATH_DEFINED" || exit
+#         mv "$CURRENT_ADMIN_PATH" "$PRESTASHOP_ADMIN_PATH" 
+# fi
  
 echo "###############################################################"
 echo "##### Cache clear"
 
-su www-data -s /bin/bash -c "bin/console cache:clear"
-echo -e "##### Cache clear\n"
+    su www-data -s /bin/bash -c "bin/console cache:clear"
+
 echo "###############################################################"
 echo "##### End of entrypoint.sh execution"
 

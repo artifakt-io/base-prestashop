@@ -20,11 +20,10 @@ vim \
 wget \
 && rm -rf /var/lib/apt/lists/*
 
-
+if [ -z "$PRESTASHOP_ADMIN_PATH" ];then
+    PRESTASHOP_ADMIN_PATH="admin_base"
+fi
 echo "######################################################"
 echo "##### Admin path in varnish and nginx conf "
 sed -i "s/ADMIN_TO_CHANGE/$PRESTASHOP_ADMIN_PATH/g" /.artifakt/etc/varnish/default.vcl
 sed -i "s/ADMIN_TO_CHANGE/$PRESTASHOP_ADMIN_PATH/g" /.artifakt/etc/nginx/default.conf
-
-
-
