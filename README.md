@@ -139,15 +139,15 @@ Si vous voulez réinitialiser l'installation, il suffit de renseigner la variabl
 
 ---
 
-| Variables                                                     | Description                                            |
-| :------------------------------------------------------------ | :----------------------------------------------------- |
-| LOCAL_INSTALL                                                 | Actions spécifiques au dev local                       |
-| <span style="color: #FF0000">PRESTASHOP_VERSION</span>        | Version de prestashop (obligatoire)                    |
-| <span style="color: #FF0000">PRESTASHOP_SERVER_DOMAIN</span>  | Renseignement du domaine (obligatoire)                 |
-| <span style="color: #26B260">PRESTASHOP_PROJECT_NAME</span>   | Nom du projet (obligatoire au setup)                   |
-| PRESTASHOP_CLEAN_REINSTALL                                    | Réinstallation du projet                               |
-| <span style="color: #FF0000">ARTIFAKT_COMPOSER_VERSION</span> | (obligatoire)                                          |
-| PRESTASHOP_ADMIN_PATH                                         | Valeure par défaut : admin_base (obligatoire au setup) |
+| Variables                                                    | Description                             |
+| :----------------------------------------------------------- | :-------------------------------------- |
+| LOCAL_INSTALL                                                | Actions spécifiques au dev local        |
+| PRESTASHOP_VERSION                                           | Version de prestashop par défaut, 2.3.7 |
+| <span style="color: #FF0000">PRESTASHOP_SERVER_DOMAIN</span> | Renseignement du domaine (obligatoire)  |
+| <span style="color: #26B260">PRESTASHOP_PROJECT_NAME</span>  | Nom du projet (obligatoire au setup)    |
+| PRESTASHOP_CLEAN_REINSTALL                                   | Réinstallation du projet                |
+| ARTIFAKT_COMPOSER_VERSION                                    | (2.3.7 par défaut)                      |
+| PRESTASHOP_ADMIN_PATH                                        | Valeure par défaut : admin_base         |
 
 ```
 

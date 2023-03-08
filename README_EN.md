@@ -135,15 +135,15 @@ If you want to reset the installation, simply set the PRESTASHOP_CLEAN_REINSTALL
 
 ---
 
-| Variables                                                     | Description                                    |
-| :------------------------------------------------------------ | :--------------------------------------------- |
-| LOCAL_INSTALL                                                 | Actions specific to local development          |
-| <span style="color: #FF0000">PRESTASHOP_VERSION</span>        | Prestashop version (mandatory)                 |
-| <span style="color: #FF0000">PRESTASHOP_SERVER_DOMAIN</span>  | Server domain information (mandatory)          |
-| <span style="color: #26B260">PRESTASHOP_PROJECT_NAME</span>   | Project name (mandatory at setup)              |
-| PRESTASHOP_CLEAN_REINSTALL                                    | Reinstall the project                          |
-| <span style="color: #FF0000">ARTIFAKT_COMPOSER_VERSION</span> | (mandatory)                                    |
-| PRESTASHOP_ADMIN_PATH                                         | Default value: admin_base (mandatory at setup) |
+| Variables                                                    | Description                           |
+| :----------------------------------------------------------- | :------------------------------------ |
+| LOCAL_INSTALL                                                | Actions specific to local development |
+| PRESTASHOP_VERSION                                           | Default Prestashop version (2.3.7)    |
+| <span style="color: #FF0000">PRESTASHOP_SERVER_DOMAIN</span> | Server domain information (mandatory) |
+| <span style="color: #26B260">PRESTASHOP_PROJECT_NAME</span>  | Project name (mandatory at setup)     |
+| PRESTASHOP_CLEAN_REINSTALL                                   | Reinstall the project                 |
+| ARTIFAKT_COMPOSER_VERSION                                    | (2.3.7 by default)                    |
+| PRESTASHOP_ADMIN_PATH                                        | Default value: admin_base             |
 
 ## Common Docker commands
 

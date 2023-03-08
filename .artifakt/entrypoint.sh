@@ -85,6 +85,8 @@ if [ ! -d "$APP_ROOT_PATH_DEFINED/$PRESTASHOP_ADMIN_PATH" ]; then
     echo "##### Variable PRESTASHOP_ADMIN_PATH: $PRESTASHOP_ADMIN_PATH"
 
     if [ -z "$CURRENT_ADMIN_PATH" ]; then
+    
+        if [ -z "$PRESTASHOP_VERSION" ];then PRESTASHOP_VERSION="2.3.7"; fi
 
         echo "######################################################"
         echo "##### Prestashop import"
