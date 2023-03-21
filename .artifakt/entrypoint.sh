@@ -5,6 +5,7 @@
 if [ -z "$PRESTASHOP_VERSION" ];then PRESTASHOP_VERSION="1.7.8.8"; fi
 if [ -z "$PRESTASHOP_ADMIN_PATH" ];then PRESTASHOP_ADMIN_PATH="admin_base"; fi
 if [ -z "$PRESTASHOP_PROJECT_NAME" ];then PRESTASHOP_PROJECT_NAME="Artifakt"; fi
+if [ -z "$ARTIFAKT_MYSQL_DATABASE_PREFIX" ];then ARTIFAKT_MYSQL_DATABASE_PREFIX="prestashop"; fi
 
 echo "######################################################"
 echo "##### Server Domain "
@@ -18,7 +19,7 @@ if [ -n "$ARTIFAKT_MYSQL_DATABASE_PREFIX" ]; then
     echo "##### Table prefix && configuration table name"    
         configuration_table_name="$ARTIFAKT_MYSQL_DATABASE_PREFIX"_configuration;
         prefix=$ARTIFAKT_MYSQL_DATABASE_PREFIX"_";
-    fi    
+fi    
 echo -e "Table prefix is $prefix\n"
 echo -e "Configuration table name is $configuration_table_name\n"
 
