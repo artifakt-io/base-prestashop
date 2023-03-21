@@ -1,6 +1,11 @@
 #!/bin/bash
 [ "$DEBUG" = "true" ] && set -x
 
+###### Variables
+if [ -z "$PRESTASHOP_VERSION" ];then PRESTASHOP_VERSION="1.7.8.8"; fi
+if [ -z "$PRESTASHOP_ADMIN_PATH" ];then PRESTASHOP_ADMIN_PATH="admin_base"; fi
+if [ -z "$PRESTASHOP_PROJECT_NAME" ];then PRESTASHOP_PROJECT_NAME="Artifakt"; fi
+
 echo "######################################################"
 echo "##### Server Domain "
 if [ -n "$PRESTASHOP_SERVER_DOMAIN" ]; then server_domain="$PRESTASHOP_SERVER_DOMAIN"; else server_domain="localhost"; fi
