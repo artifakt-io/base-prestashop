@@ -118,13 +118,6 @@ if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
     fi    
 fi
 
-if [ -d "/var/www/code/install" ]; then
-    echo "### Remove install folder"
-    rm -rf /var/www/code/install
-fi
-
-
-
 if [ -d "/var/www/code/admin" ]; then
     echo "###############################################################"
     echo "##### ADMIN FOLDER NAME CHANGE: admin to $PRESTASHOP_ADMIN_PATH"
