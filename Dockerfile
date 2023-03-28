@@ -28,5 +28,4 @@ WORKDIR /var/www/code
 
 HEALTHCHECK --interval=30s --timeout=3s \
     CMD cgi-fcgi -bind -connect localhost:$ARTIFAKT_PHP_FPM_PORT
-
 CMD ["php-fpm", "-R"]
