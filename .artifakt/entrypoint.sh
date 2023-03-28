@@ -129,14 +129,9 @@ fi
 echo "###############################################################"
 echo "##### Cache clear"
 
-#su www-data -s /bin/bash -c "bin/console cache:clear"
+su www-data -s /bin/bash -c "bin/console cache:clear"
 echo -e "##### Cache clear\n"
 echo "###############################################################"
-
-# if [ -d "/var/www/code/install" ]; then
-#     echo "### Remove install folder"
-#     rm -rf /var/www/code/install
-# fi
 
 echo "##### End of entrypoint.sh execution"
 
