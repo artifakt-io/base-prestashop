@@ -147,6 +147,11 @@ fi
 
 if [ -d "/var/www/code/install" ]; then rm -rf /var/www/code/install; fi
 
+echo "define('_PS_CACHE_ENABLED_', '0');" >> /var/www/code/config/defines.inc.php
+echo "define('_PS_CACHE_SYSTEM_', 'REDIS');" >> /var/www/code/config/defines.inc.php
+echo "define('_REDIS_SERVER_', ${_ENV['ARTIFAKT_REDIS_HOST']});" >> /var/www/code/config/defines.inc.php
+echo "define('_REDIS_PORT_', ${_ENV['ARTIFAKT_REDIS_PORT']});" >> /var/www/code/config/defines.inc.php
+
 echo "###############################################################"
 echo "##### Cache clear"
 
