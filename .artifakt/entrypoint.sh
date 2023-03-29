@@ -136,8 +136,8 @@ if [ -d "$APP_ROOT_PATH/admin" ]; then
         rm -rf admin*
         mv back_admin "$PRESTASHOP_ADMIN_PATH"
     else
-            cd $APP_ROOT_PATH || exit
-
+        echo "##### OLD FOLDER ADMIN NAME CHANGE: old_admin to $PRESTASHOP_ADMIN_PATH"
+        cd $APP_ROOT_PATH || exit
         mv "$PRESTASHOP_ADMIN_PATH" back_admin
         rm -rf admin*
         mv back_admin "$PRESTASHOP_ADMIN_PATH"
