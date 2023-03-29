@@ -1,11 +1,6 @@
 #!/bin/bash
 [ "$DEBUG" = "true" ] && set -x
 
-PERSISTENT_STORAGE="/data/"
-if [ -n "$LOCAL_INSTALL" ]; then
-  PERSISTENT_STORAGE="/var/www/data/"
-fi
-
 echo "######################################################"
 echo "##### DB connexion test"
 while ! mysqladmin ping -h"$ARTIFAKT_MYSQL_HOST" --silent; do
@@ -15,21 +10,11 @@ done
 
 
 if [ -z "$PRESTASHOP_CLEAN_REINSTALL" ]; then
-  export PRESTASHOP_CLEAN_REINSTALL=0
+    PRESTASHOP_CLEAN_REINSTALL=0
 fi
 
 if [ "$PRESTASHOP_CLEAN_REINSTALL" -eq 1 ] && [ "$ARTIFAKT_IS_MAIN_INSTANCE" -eq 1 ]; then
-  echo "######################################################"
-  echo "##### Prestashop Clean ReInstall"
-  echo "######################################################"
-
-  echo "Drop DB Tables"
-  mysql --silent --skip-column-names -h"$ARTIFAKT_MYSQL_HOST" -u"$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" -e "SHOW TABLES" "$ARTIFAKT_MYSQL_DATABASE_NAME" | xargs -L1 -I% echo 'SET FOREIGN_KEY_CHECKS=0;DROP TABLE `%`;SET FOREIGN_KEY_CHECKS=1;' | mysql -v -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME"
-
-  if [ -n "$LOCAL_INSTALL" ]; then
-    echo "Clean $PERSISTENT_STORAGE folder"
-    rm -rf "$PERSISTENT_STORAGE*"
-  fi
+    sh /var/www/html/.artifakt/fresh_install.sh;
 fi
 
 echo "######################################################"
@@ -58,8 +43,6 @@ if [ -z "$LOCAL_INSTALL" ];then
         cp -f /.artifakt/etc/varnish/default.vcl /conf/varnish/default.vcl || echo "No config default.vcl"
         cp -f /.artifakt/etc/nginx/default.conf /conf/nginxfpm/default.conf || echo "No config default.conf"
 fi
-
-
 
 if [ -n "$LOCAL_INSTALL" ]; then
     echo "######################################################"
