@@ -92,11 +92,11 @@ if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
     echo "### Number of tables: $tableCount"
 
     if [ "$tableCount" -eq 0 ]; then
-    echo "define('_PS_CACHE_ENABLED_', '0');" >> /var/www/code/config/defines.inc.php
-echo "define('_PS_CACHE_SYSTEM_', 'REDIS');" >> /var/www/code/config/defines.inc.php
-echo "define('_REDIS_SERVER_', '$ARTIFAKT_REDIS_HOST');" >> /var/www/code/config/defines.inc.php
-echo "define('_REDIS_PORT_', '$ARTIFAKT_REDIS_PORT');" >> /var/www/code/config/defines.inc.php
-echo "define('_PS_INSTALL_PATH_', '');" >> /var/www/code/config/defines.inc.php
+        echo "define('_PS_CACHE_ENABLED_', '0');" >> /var/www/code/config/defines.inc.php
+        echo "define('_PS_CACHE_SYSTEM_', 'REDIS');" >> /var/www/code/config/defines.inc.php
+        echo "define('_REDIS_SERVER_', '$ARTIFAKT_REDIS_HOST');" >> /var/www/code/config/defines.inc.php
+        echo "define('_REDIS_PORT_', '$ARTIFAKT_REDIS_PORT');" >> /var/www/code/config/defines.inc.php
+        echo "define('_PS_INSTALL_PATH_', '');" >> /var/www/code/config/defines.inc.php
 
         if [ -d "$APP_ROOT_PATH/install" ]; then
             echo "######################################################"
@@ -150,7 +150,7 @@ if [ -d "$APP_ROOT_PATH/admin" ]; then
 fi
  
 
-if [ -d "/var/www/code/install" ]; then rm -rf /var/www/code/install; fi
+# if [ -d "/var/www/code/install" ]; then rm -rf /var/www/code/install; fi
 
 
 
