@@ -63,7 +63,7 @@ else
     echo "No needs to create user."
 fi
 
-if [ ! -d "$APP_ROOT_PATH/$PRESTASHOP_ADMIN_PATH" ]; then
+if [ ! -d "$APP_ROOT_PATH/config" ]; then
     echo "######################################################"
     echo "##### Prestashop import"
     echo "##### Prestashop version $PRESTASHOP_VERSION"
@@ -100,7 +100,7 @@ if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
 
                 cd $APP_ROOT_PATH/install || exit
                 su www-data -s /bin/bash -c "php index_cli.php --step=all --domain=$server_domain --db_server=$ARTIFAKT_MYSQL_HOST --db_name=$ARTIFAKT_MYSQL_DATABASE_NAME --db_user=$ARTIFAKT_MYSQL_USER --db_password=$ARTIFAKT_MYSQL_PASSWORD --language=fr --prefix=$prefix --name=$PRESTASHOP_PROJECT_NAME"  
-            
+                
             echo "######################################################"
             echo "### SSL DB OPERATIONS"
             echo "### Enable PS_SSL_ENABLED and PS_SSL_ENABLED_EVERYWHERE on main instance"
@@ -110,6 +110,7 @@ if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
                     mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME" -e "UPDATE $configuration_table_name SET value = '1' WHERE name = 'PS_SSL_ENABLED';"
                     mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME"  -e "UPDATE $configuration_table_name SET value = '1' WHERE name = 'PS_SSL_ENABLED_EVERYWHERE';"
                 fi
+        
         else 
             echo "Database is empty and there is no install folder. Please check."
         fi
@@ -143,6 +144,9 @@ if [ -d "$APP_ROOT_PATH/admin" ]; then
         mv back_admin "$PRESTASHOP_ADMIN_PATH"
 fi
  
+
+if [ -d "/var/www/code/install" ]; then rm -rf /var/www/code/install; fi
+
 echo "###############################################################"
 echo "##### Cache clear"
 
@@ -150,10 +154,6 @@ su www-data -s /bin/bash -c "bin/console cache:clear"
 echo -e "##### Cache clear\n"
 echo "###############################################################"
 
-# if [ -d "$APP_ROOT_PATH/install/" ]; then
-#     echo "### Remove install folder"
-#     rm -rf $APP_ROOT_PATH/install || true
-# fi
 
 echo "##### End of entrypoint.sh execution"
 
