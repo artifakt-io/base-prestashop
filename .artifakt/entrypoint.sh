@@ -131,8 +131,14 @@ fi
 if [ -d "$ROOT_PATH/admin" ]; then
     echo "###############################################################"
     echo "##### ADMIN FOLDER NAME CHANGE: admin to $PRESTASHOP_ADMIN_PATH"
-        cd $ROOT_PATH || exit
-        mv admin "$PRESTASHOP_ADMIN_PATH"
+        # cd $ROOT_PATH || exit
+        mv admin admin_back
+        rm -rf admin*
+        mv admin_back "$PRESTASHOP_ADMIN_PATH"
+    else
+        mv "$PRESTASHOP_ADMIN_PATH" admin_back
+        rm -rf admin*
+        mv admin_back "$PRESTASHOP_ADMIN_PATH"
 fi
  
 echo "###############################################################"
