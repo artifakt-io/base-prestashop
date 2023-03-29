@@ -4,3 +4,8 @@
 share
 data
 .DS_Store
+docker-compose-arm.yml
+docker-compose.yml
+artifakt-custom-build-args
+.env
+README.md
