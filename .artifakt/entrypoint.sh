@@ -15,7 +15,7 @@ if [ -z "$PRESTASHOP_CLEAN_REINSTALL" ]; then
 fi
 
 if [ "$PRESTASHOP_CLEAN_REINSTALL" -eq 1 ] && [ "$ARTIFAKT_IS_MAIN_INSTANCE" -eq 1 ]; then
-    sh $ROOT_PATH/.artifakt/fresh_install.sh;
+    sh /.artifakt/fresh_install.sh;
 fi
 
 echo "######################################################"

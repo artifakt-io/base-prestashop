@@ -1,6 +1,7 @@
 FROM registry.artifakt.io/php:7.4-fpm
 
 USER root
+
 COPY . /var/www/code
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
