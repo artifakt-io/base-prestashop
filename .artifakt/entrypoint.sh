@@ -1,11 +1,36 @@
 #!/bin/bash
 [ "$DEBUG" = "true" ] && set -x
 
-###### Variables
-if [ -z "$PRESTASHOP_VERSION" ];then PRESTASHOP_VERSION="1.7.8.8"; fi
-if [ -z "$PRESTASHOP_ADMIN_PATH" ];then PRESTASHOP_ADMIN_PATH="admin_base"; fi
-if [ -z "$PRESTASHOP_PROJECT_NAME" ];then PRESTASHOP_PROJECT_NAME="Artifakt"; fi
-if [ -z "$ARTIFAKT_MYSQL_DATABASE_PREFIX" ];then ARTIFAKT_MYSQL_DATABASE_PREFIX="prestashop"; fi
+PERSISTENT_STORAGE="/data/"
+if [ -n "$LOCAL_INSTALL" ]; then
+  PERSISTENT_STORAGE="/var/www/data/"
+fi
+
+echo "######################################################"
+echo "##### DB connexion test"
+while ! mysqladmin ping -h"$ARTIFAKT_MYSQL_HOST" --silent; do
+    echo "Waiting for db..."
+    sleep 1
+done
+
+
+if [ -z "$PRESTASHOP_CLEAN_REINSTALL" ]; then
+  export PRESTASHOP_CLEAN_REINSTALL=0
+fi
+
+if [ "$PRESTASHOP_CLEAN_REINSTALL" -eq 1 ] && [ "$ARTIFAKT_IS_MAIN_INSTANCE" -eq 1 ]; then
+  echo "######################################################"
+  echo "##### Prestashop Clean ReInstall"
+  echo "######################################################"
+
+  echo "Drop DB Tables"
+  mysql --silent --skip-column-names -h"$ARTIFAKT_MYSQL_HOST" -u"$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" -e "SHOW TABLES" "$ARTIFAKT_MYSQL_DATABASE_NAME" | xargs -L1 -I% echo 'SET FOREIGN_KEY_CHECKS=0;DROP TABLE `%`;SET FOREIGN_KEY_CHECKS=1;' | mysql -v -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME"
+
+  if [ -n "$LOCAL_INSTALL" ]; then
+    echo "Clean $PERSISTENT_STORAGE folder"
+    rm -rf "$PERSISTENT_STORAGE*"
+  fi
+fi
 
 echo "######################################################"
 echo "##### Server Domain "
@@ -19,7 +44,7 @@ if [ -n "$ARTIFAKT_MYSQL_DATABASE_PREFIX" ]; then
     echo "##### Table prefix && configuration table name"    
         configuration_table_name="$ARTIFAKT_MYSQL_DATABASE_PREFIX"_configuration;
         prefix=$ARTIFAKT_MYSQL_DATABASE_PREFIX"_";
-fi    
+    fi    
 echo -e "Table prefix is $prefix\n"
 echo -e "Configuration table name is $configuration_table_name\n"
 
@@ -34,12 +59,7 @@ if [ -z "$LOCAL_INSTALL" ];then
         cp -f /.artifakt/etc/nginx/default.conf /conf/nginxfpm/default.conf || echo "No config default.conf"
 fi
 
-echo "######################################################"
-echo "##### DB connexion test"
-while ! mysqladmin ping -h"$ARTIFAKT_MYSQL_HOST" --silent; do
-    echo "Waiting for db..."
-    sleep 1
-done
+
 
 if [ -n "$LOCAL_INSTALL" ]; then
     echo "######################################################"
@@ -124,13 +144,6 @@ if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
     fi    
 fi
 
-if [ -d "/var/www/code/install" ]; then
-    echo "### Remove install folder"
-    rm -rf /var/www/code/install
-fi
-
-
-
 if [ -d "/var/www/code/admin" ]; then
     echo "###############################################################"
     echo "##### ADMIN FOLDER NAME CHANGE: admin to $PRESTASHOP_ADMIN_PATH"
@@ -145,6 +158,12 @@ echo "##### Cache clear"
 su www-data -s /bin/bash -c "bin/console cache:clear"
 echo -e "##### Cache clear\n"
 echo "###############################################################"
+
+if [ -d "/var/www/code/install/" ]; then
+    echo "### Remove install folder"
+    rm -rf /var/www/code/install || true
+fi
+
 echo "##### End of entrypoint.sh execution"
 
 
