@@ -1,7 +1,7 @@
 #!/bin/bash
 [ "$DEBUG" = "true" ] && set -x
 
-ROOT_PATH="/var/www/code";
+APP_ROOT_PATH="/var/www/code";
 
 echo "######################################################"
 echo "##### DB connexion test"
@@ -63,7 +63,7 @@ else
     echo "No needs to create user."
 fi
 
-if [ ! -d "$ROOT_PATH/$PRESTASHOP_ADMIN_PATH" ]; then
+if [ ! -d "$APP_ROOT_PATH/$PRESTASHOP_ADMIN_PATH" ]; then
     echo "######################################################"
     echo "##### Prestashop import"
     echo "##### Prestashop version $PRESTASHOP_VERSION"
@@ -73,15 +73,15 @@ if [ ! -d "$ROOT_PATH/$PRESTASHOP_ADMIN_PATH" ]; then
         cd /tmp && \
         wget https://download.prestashop.com/download/releases/prestashop_"$PRESTASHOP_VERSION".zip -q --show-progress && \
         unzip -qq prestashop_*.zip && \
-        echo "### Unzip Prestashop zip in $ROOT_PATH"
-        unzip -qq prestashop.zip -d $ROOT_PATH && \
+        echo "### Unzip Prestashop zip in $APP_ROOT_PATH"
+        unzip -qq prestashop.zip -d $APP_ROOT_PATH && \
         rm /tmp/*.zip  /tmp/index.php /tmp/Install_PrestaShop.html
 
     echo "######################################################"
     echo "##### PRESTASHOP PERMISSIONS"
 
-        chown -R www-data:www-data $ROOT_PATH/
-        chmod -R 755 $ROOT_PATH/   
+        chown -R www-data:www-data $APP_ROOT_PATH/
+        chmod -R 755 $APP_ROOT_PATH/   
 else
     echo "Prestashop import is already done."
 fi
@@ -93,12 +93,12 @@ if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
 
     if [ "$tableCount" -eq 0 ]; then
 
-        if [ -d "$ROOT_PATH/install" ]; then
+        if [ -d "$APP_ROOT_PATH/install" ]; then
             echo "######################################################"
             echo "##### PRESTASHOP CONFIGURATION"
             echo "######################################################"
 
-                cd $ROOT_PATH/install || exit
+                cd $APP_ROOT_PATH/install || exit
                 su www-data -s /bin/bash -c "php index_cli.php --step=all --domain=$server_domain --db_server=$ARTIFAKT_MYSQL_HOST --db_name=$ARTIFAKT_MYSQL_DATABASE_NAME --db_user=$ARTIFAKT_MYSQL_USER --db_password=$ARTIFAKT_MYSQL_PASSWORD --language=fr --prefix=$prefix --name=$PRESTASHOP_PROJECT_NAME"  
             
             echo "######################################################"
@@ -128,10 +128,10 @@ if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
     fi    
 fi
 
-if [ -d "$ROOT_PATH/admin" ]; then
+if [ -d "$APP_ROOT_PATH/admin" ]; then
     echo "###############################################################"
     echo "##### ADMIN FOLDER NAME CHANGE: admin to $PRESTASHOP_ADMIN_PATH"
-        # cd $ROOT_PATH || exit
+        # cd $APP_ROOT_PATH || exit
         mv admin admin_back
         rm -rf admin*
         mv admin_back "$PRESTASHOP_ADMIN_PATH"
@@ -148,9 +148,9 @@ su www-data -s /bin/bash -c "bin/console cache:clear"
 echo -e "##### Cache clear\n"
 echo "###############################################################"
 
-# if [ -d "$ROOT_PATH/install/" ]; then
+# if [ -d "$APP_ROOT_PATH/install/" ]; then
 #     echo "### Remove install folder"
-#     rm -rf $ROOT_PATH/install || true
+#     rm -rf $APP_ROOT_PATH/install || true
 # fi
 
 echo "##### End of entrypoint.sh execution"
