@@ -142,10 +142,10 @@ su www-data -s /bin/bash -c "bin/console cache:clear"
 echo -e "##### Cache clear\n"
 echo "###############################################################"
 
-if [ -d "$ROOT_PATH/install/" ]; then
-    echo "### Remove install folder"
-    rm -rf $ROOT_PATH/install || true
-fi
+# if [ -d "$ROOT_PATH/install/" ]; then
+#     echo "### Remove install folder"
+#     rm -rf $ROOT_PATH/install || true
+# fi
 
 echo "##### End of entrypoint.sh execution"
 
