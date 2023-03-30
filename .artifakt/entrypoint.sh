@@ -25,12 +25,14 @@ echo -e "Server domain is $server_domain\n"
 
 configuration_table_name="configuration";
 prefix="";
+
 if [ -n "$ARTIFAKT_MYSQL_DATABASE_PREFIX" ]; then 
     echo "######################################################"
     echo "##### Table prefix && configuration table name"    
         configuration_table_name="$ARTIFAKT_MYSQL_DATABASE_PREFIX"_configuration;
         prefix=$ARTIFAKT_MYSQL_DATABASE_PREFIX"_";
-    fi    
+fi 
+
 echo -e "Table prefix is $prefix\n"
 echo -e "Configuration table name is $configuration_table_name\n"
 
@@ -63,6 +65,8 @@ else
     echo "No needs to create user."
 fi
 
+  
+
 if [ ! -d "$APP_ROOT_PATH/config" ]; then
     echo "######################################################"
     echo "##### Prestashop import"
@@ -86,52 +90,45 @@ else
     echo "Prestashop import is already done."
 fi
 
-if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
-    echo "### Check if the database is already installed"
-    tableCount=$(mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME" -B -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '$ARTIFAKT_MYSQL_DATABASE_NAME';" | grep -v "count");
-    echo "### Number of tables: $tableCount"
+if [ -d "$APP_ROOT_PATH/install" ]; then
 
-    if [ "$tableCount" -eq 0 ]; then
+    echo "######################################################"
+    echo "##### REDIS CONFIGURATION"
+    echo "######################################################"
+        { echo -e "define('_PS_CACHE_ENABLED_', '0');\ndefine('_PS_CACHE_SYSTEM_', 'REDIS');\ndefine('_REDIS_SERVER_', '$ARTIFAKT_REDIS_HOST');\ndefine('_REDIS_PORT_', '$ARTIFAKT_REDIS_PORT');\ndefine('_PS_INSTALL_PATH_', '');"; } >> /var/www/code/config/defines.inc.ph
+    cd $APP_ROOT_PATH/install || exit
+    su www-data -s /bin/bash -c "php index_cli.php --step=all --domain=$server_domain --db_server=$ARTIFAKT_MYSQL_HOST --db_name=$ARTIFAKT_MYSQL_DATABASE_NAME --db_user=$ARTIFAKT_MYSQL_USER --db_password=$ARTIFAKT_MYSQL_PASSWORD --language=fr --prefix=$prefix --name=$PRESTASHOP_PROJECT_NAME"               
 
+    if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
         echo "######################################################"
-        echo "##### REDIS CONFIGURATION"
+        echo "##### PRESTASHOP CONFIGURATION"
         echo "######################################################"
-        { echo -e "define('_PS_CACHE_ENABLED_', '0');\ndefine('_PS_CACHE_SYSTEM_', 'REDIS');\ndefine('_REDIS_SERVER_', '$ARTIFAKT_REDIS_HOST');\ndefine('_REDIS_PORT_', '$ARTIFAKT_REDIS_PORT');\ndefine('_PS_INSTALL_PATH_', '');"; } >> /var/www/code/config/defines.inc.php
 
-        if [ -d "$APP_ROOT_PATH/install" ]; then
-            echo "######################################################"
-            echo "##### PRESTASHOP CONFIGURATION"
-            echo "######################################################"
-
-                cd $APP_ROOT_PATH/install || exit
-                su www-data -s /bin/bash -c "php index_cli.php --step=all --domain=$server_domain --db_server=$ARTIFAKT_MYSQL_HOST --db_name=$ARTIFAKT_MYSQL_DATABASE_NAME --db_user=$ARTIFAKT_MYSQL_USER --db_password=$ARTIFAKT_MYSQL_PASSWORD --language=fr --prefix=$prefix --name=$PRESTASHOP_PROJECT_NAME"  
-                
+        echo "### Check if the database is already installed"
+        tableCount=$(mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME" -B -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '$ARTIFAKT_MYSQL_DATABASE_NAME';" | grep -v "count");
+        echo "### Number of tables: $tableCount"
+        if [ "$tableCount" -ne 0 ]; then
             echo "######################################################"
             echo "### SSL DB OPERATIONS"
             echo "### Enable PS_SSL_ENABLED and PS_SSL_ENABLED_EVERYWHERE on main instance"
-
-                if [  "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
-                    configuration_table_name="$ARTIFAKT_MYSQL_DATABASE_PREFIX"_configuration;
-                    mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME" -e "UPDATE $configuration_table_name SET value = '1' WHERE name = 'PS_SSL_ENABLED';"
-                    mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME"  -e "UPDATE $configuration_table_name SET value = '1' WHERE name = 'PS_SSL_ENABLED_EVERYWHERE';"
-                fi
+                configuration_table_name="$ARTIFAKT_MYSQL_DATABASE_PREFIX"_configuration;
+                mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME" -e "UPDATE $configuration_table_name SET value = '1' WHERE name = 'PS_SSL_ENABLED';"
+                mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME"  -e "UPDATE $configuration_table_name SET value = '1' WHERE name = 'PS_SSL_ENABLED_EVERYWHERE';"
         
-        else 
-            echo "Database is empty and there is no install folder. Please check."
-        fi
-    else
-        echo -e "Database is not empty. Configuration is already done.\n"
-    fi
-    echo -e "Check domains.\n"
-    shop_url_table_name="$ARTIFAKT_MYSQL_DATABASE_PREFIX"_shop_url;
+            echo -e "Check domains.\n"
+            shop_url_table_name="$ARTIFAKT_MYSQL_DATABASE_PREFIX"_shop_url;
 
-    domain_check=$(mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME" -B -N -e "SELECT domain FROM $shop_url_table_name;" | grep -v domain);
-    if [ "$domain_check" != "$PRESTASHOP_SERVER_DOMAIN" ]; then
-        mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME" -e "UPDATE $shop_url_table_name SET domain=\"$PRESTASHOP_SERVER_DOMAIN\", domain_ssl=\"$PRESTASHOP_SERVER_DOMAIN\" WHERE main = '1';"
-        echo -e "Domains are set."
-    else
-        echo -e "Domains already set."
-    fi    
+            domain_check=$(mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME" -B -N -e "SELECT domain FROM $shop_url_table_name;" | grep -v domain);
+            if [ "$domain_check" != "$PRESTASHOP_SERVER_DOMAIN" ]; then
+                mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME" -e "UPDATE $shop_url_table_name SET domain=\"$PRESTASHOP_SERVER_DOMAIN\", domain_ssl=\"$PRESTASHOP_SERVER_DOMAIN\" WHERE main = '1';"
+                echo -e "Domains are set."
+            else
+                echo -e "Domains already set."
+            fi        
+        fi
+    fi
+else 
+    echo "No install folder.Prestashop seems to be already ready."
 fi
 
 if [ -d "$APP_ROOT_PATH/admin" ]; then
@@ -150,7 +147,7 @@ if [ -d "$APP_ROOT_PATH/admin" ]; then
 fi
  
 
-# if [ -d "/var/www/code/install" ]; then rm -rf /var/www/code/install; fi
+if [ -d "/var/www/code/install" ]; then rm -rf /var/www/code/install; fi
 
 
 
