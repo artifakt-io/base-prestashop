@@ -95,7 +95,7 @@ if [ -d "$APP_ROOT_PATH/install" ]; then
     echo "######################################################"
     echo "##### REDIS CONFIGURATION"
     echo "######################################################"
-        { echo -e "define('_PS_CACHE_ENABLED_', '0');\ndefine('_PS_CACHE_SYSTEM_', 'REDIS');\ndefine('_REDIS_SERVER_', '$ARTIFAKT_REDIS_HOST');\ndefine('_REDIS_PORT_', '$ARTIFAKT_REDIS_PORT');\ndefine('_PS_INSTALL_PATH_', '');"; } >> /var/www/code/config/defines.inc.ph
+        { echo -e "define('_PS_CACHE_ENABLED_', '0');\ndefine('_PS_CACHE_SYSTEM_', 'REDIS');\ndefine('_REDIS_SERVER_', '$ARTIFAKT_REDIS_HOST');\ndefine('_REDIS_PORT_', '$ARTIFAKT_REDIS_PORT');"; } >> /var/www/code/config/defines.inc.ph
     cd $APP_ROOT_PATH/install || exit
     su www-data -s /bin/bash -c "php index_cli.php --step=all --domain=$server_domain --db_server=$ARTIFAKT_MYSQL_HOST --db_name=$ARTIFAKT_MYSQL_DATABASE_NAME --db_user=$ARTIFAKT_MYSQL_USER --db_password=$ARTIFAKT_MYSQL_PASSWORD --language=fr --prefix=$prefix --name=$PRESTASHOP_PROJECT_NAME"               
 
