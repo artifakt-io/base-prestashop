@@ -125,7 +125,7 @@ if [ -d "$APP_ROOT_PATH/install" ]; then
     echo "######################################################"
     echo "##### REDIS CONFIGURATION"
     echo "######################################################"
-        { echo -e "define('_PS_CACHE_ENABLED_', '0');\ndefine('_PS_CACHE_SYSTEM_', 'REDIS');\ndefine('_REDIS_SERVER_', '$ARTIFAKT_REDIS_HOST');\ndefine('_REDIS_PORT_', '$ARTIFAKT_REDIS_PORT');"; } >> /var/www/code/config/defines.inc.ph
+        # { echo -e "define('_PS_CACHE_ENABLED_', '0');\ndefine('_PS_CACHE_SYSTEM_', 'REDIS');\ndefine('_REDIS_SERVER_', '$ARTIFAKT_REDIS_HOST');\ndefine('_REDIS_PORT_', '$ARTIFAKT_REDIS_PORT');"; } >> /var/www/code/config/defines.inc.ph
 else 
     echo "No install folder.Prestashop seems to be already ready."
 fi
