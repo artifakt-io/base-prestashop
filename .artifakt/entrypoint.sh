@@ -122,14 +122,14 @@ if [ -d "$APP_ROOT_PATH/install" ]; then
         else         
             su www-data -s /bin/bash -c "php index_cli.php --step=all --domain='trainingsessions-purpleearthworm-teo8r.artifakt.dev' --db_server=$ARTIFAKT_MYSQL_HOST --db_name=$ARTIFAKT_MYSQL_DATABASE_NAME --db_user=$ARTIFAKT_MYSQL_USER --db_password=$ARTIFAKT_MYSQL_PASSWORD --language=fr --prefix='pylones_' --name=$PRESTASHOP_PROJECT_NAME --db_create=0"
         fi
+    echo "######################################################"
+    echo "##### REDIS CONFIGURATION"
+    echo "######################################################"
+        { echo -e "define('_PS_CACHE_ENABLED_', '0');\ndefine('_PS_CACHE_SYSTEM_', 'REDIS');\ndefine('_REDIS_SERVER_', '$ARTIFAKT_REDIS_HOST');\ndefine('_REDIS_PORT_', '$ARTIFAKT_REDIS_PORT');"; } >> /var/www/code/config/defines.inc.php
 else 
     echo "No install folder.Prestashop seems to be already ready."
 fi 
 
-echo "######################################################"
-echo "##### REDIS CONFIGURATION"
-echo "######################################################"
-{ echo -e "define('_PS_CACHE_ENABLED_', '0');\ndefine('_PS_CACHE_SYSTEM_', 'REDIS');\ndefine('_REDIS_SERVER_', '$ARTIFAKT_REDIS_HOST');\ndefine('_REDIS_PORT_', '$ARTIFAKT_REDIS_PORT');"; } >> /var/www/code/config/defines.inc.php
 
 
 if [ -d "$APP_ROOT_PATH/admin" ]; then
