@@ -8,3 +8,5 @@ docker-compose-arm.yml
 docker-compose.yml
 .env
 README.md
+Dockerfile
+.dockerignore
