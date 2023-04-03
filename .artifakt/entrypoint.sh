@@ -97,9 +97,9 @@ if [ -d "$APP_ROOT_PATH/install" ]; then
 
         cd $APP_ROOT_PATH/install || exit
         if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
-            su www-data -s /bin/bash -c "php index_cli.php --step=all --domain=$server_domain --db_server=$ARTIFAKT_MYSQL_HOST --db_name=$ARTIFAKT_MYSQL_DATABASE_NAME --db_user=$ARTIFAKT_MYSQL_USER --db_password=$ARTIFAKT_MYSQL_PASSWORD --language=fr --prefix=$prefix --name=$PRESTASHOP_PROJECT_NAME --ssl='1'"               
+            su www-data -s /bin/bash -c "php index_cli.php --step=all --domain=$server_domain --db_server=$ARTIFAKT_MYSQL_HOST --db_name=$ARTIFAKT_MYSQL_DATABASE_NAME --db_user=$ARTIFAKT_MYSQL_USER --db_password=$ARTIFAKT_MYSQL_PASSWORD --language=fr --prefix=$prefix --name=$PRESTASHOP_PROJECT_NAME --firstname=Iceberg --lastname=Slim --password=ABAree8she --email=bruno.pinchede@artifakt.io"               
         else         
-            su www-data -s /bin/bash -c "php index_cli.php --step=all --domain='trainingsessions-purpleearthworm-teo8r.artifakt.dev' --db_server=$ARTIFAKT_MYSQL_HOST --db_name=$ARTIFAKT_MYSQL_DATABASE_NAME --db_user=$ARTIFAKT_MYSQL_USER --db_password=$ARTIFAKT_MYSQL_PASSWORD --language=fr --prefix='pylones_' --name=$PRESTASHOP_PROJECT_NAME --db_create=0"
+            su www-data -s /bin/bash -c "php index_cli.php --step=all --domain=$server_domain --db_server=$ARTIFAKT_MYSQL_HOST --db_name=$ARTIFAKT_MYSQL_DATABASE_NAME --db_user=$ARTIFAKT_MYSQL_USER --db_password=$ARTIFAKT_MYSQL_PASSWORD --language=fr --prefix='pylones_' --name=$PRESTASHOP_PROJECT_NAME --firstname=Iceberg --lastname=Slim --password=ABAree8she --email=bruno.pinchede@artifakt.io --db_create=0"
         fi
 else 
     echo "No install folder.Prestashop seems to be already ready."
@@ -115,6 +115,12 @@ if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
     else
         echo -e "Domains already set."
     fi        
+    echo "######################################################"
+    echo "### SSL DB OPERATIONS"
+    echo "### Enable PS_SSL_ENABLED and PS_SSL_ENABLED_EVERYWHERE on main instance"
+        configuration_table_name="$ARTIFAKT_MYSQL_DATABASE_PREFIX"_configuration;
+        mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME" -e "UPDATE $configuration_table_name SET value = '1' WHERE name = 'PS_SSL_ENABLED';"
+        mysql -h "$ARTIFAKT_MYSQL_HOST" -u "$ARTIFAKT_MYSQL_USER" -p"$ARTIFAKT_MYSQL_PASSWORD" "$ARTIFAKT_MYSQL_DATABASE_NAME"  -e "UPDATE $configuration_table_name SET value = '1' WHERE name = 'PS_SSL_ENABLED_EVERYWHERE';"
 fi
 
 if [ -d "$APP_ROOT_PATH/admin" ]; then
@@ -135,7 +141,7 @@ if [ -d "$APP_ROOT_PATH/install" ]; then
     echo "######################################################"
     echo "##### REDIS CONFIGURATION"
     echo "######################################################"
-        { echo -e "define('_PS_CACHE_ENABLED_', '0');\ndefine('_PS_CACHE_SYSTEM_', 'REDIS');\ndefine('_REDIS_SERVER_', '$ARTIFAKT_REDIS_HOST');\ndefine('_REDIS_PORT_', '$ARTIFAKT_REDIS_PORT');"; } >> /var/www/code/config/defines.inc.php
+        { echo -e "define('_PS_CACHING_SYSTEM_', 'REDIS');\ndefine('_REDIS_SERVER_', '$ARTIFAKT_REDIS_HOST');\ndefine('_REDIS_PORT_', '$ARTIFAKT_REDIS_PORT');"; } >> /var/www/code/config/defines.inc.php
 fi 
 
 if [ -d "/var/www/code/install" ]; then rm -rf /var/www/code/install; fi
