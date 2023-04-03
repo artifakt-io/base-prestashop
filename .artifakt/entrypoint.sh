@@ -65,6 +65,7 @@ else
     echo "No needs to create user."
 fi
 
+
 if [ ! -d "$APP_ROOT_PATH/config" ]; then
     echo "######################################################"
     echo "##### Prestashop import"
@@ -135,15 +136,27 @@ if [ -d "$APP_ROOT_PATH/admin" ]; then
         rm -rf admin*
         mv back_admin "$PRESTASHOP_ADMIN_PATH"
 fi
-# if [ -d "$APP_ROOT_PATH/install" ]; then
-#     echo "######################################################"
-#     echo "##### REDIS CONFIGURATION"
-#     echo "######################################################"
-#         { echo -e "define('_PS_CACHING_SYSTEM_', 'REDIS');\ndefine('_REDIS_SERVER_', '$ARTIFAKT_REDIS_HOST');\ndefine('_REDIS_PORT_', '$ARTIFAKT_REDIS_PORT');"; } >> /var/www/code/config/defines.inc.php
-# fi 
+if [ -d "$APP_ROOT_PATH/install" ]; then
+    echo "######################################################"
+    echo "##### REDIS CONFIGURATION"
+    echo "######################################################"
+        { echo -e "define('_PS_CACHING_SYSTEM_', 'REDIS');\ndefine('_REDIS_SERVER_', '$ARTIFAKT_REDIS_HOST');\ndefine('_REDIS_PORT_', '$ARTIFAKT_REDIS_PORT');"; } >> /var/www/code/config/defines.inc.php
+fi 
 
 if [ -d "/var/www/code/install" ]; then rm -rf /var/www/code/install; fi
 
+if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
+    if [ ! -f "/data/parameters.php" ];then 
+        cp -f "$APP_ROOT_PATH/app/config/parameters.php" /data/
+        chown www:data:www-data /data/parameters.php
+    fi
+fi
+
+rm "$APP_ROOT_PATH/app/config/parameters.php"
+cd "$APP_ROOT_PATH/app/config" || exit  
+ln -s /data/parameters.php parametesr.php
+chown -h www-data:www-data parameters.php
+cd $APP_ROOT_PATH || exit
 
 
 echo "###############################################################"
