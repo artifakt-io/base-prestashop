@@ -96,9 +96,9 @@ if [ -d "$APP_ROOT_PATH/install" ]; then
 
         cd $APP_ROOT_PATH/install || exit
         if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
-            su www-data -s /bin/bash -c "php index_cli.php --step=all --domain=$server_domain --db_server=$ARTIFAKT_MYSQL_HOST --db_name=$ARTIFAKT_MYSQL_DATABASE_NAME --db_user=$ARTIFAKT_MYSQL_USER --db_password=$ARTIFAKT_MYSQL_PASSWORD --language=fr --prefix=$prefix --name=$PRESTASHOP_PROJECT_NAME --firstname=Iceberg --lastname=Slim --password=ABAree8she --email=bruno.pinchede@artifakt.io"               
+            su www-data -s /bin/bash -c "php index_cli.php --step=all --domain=$server_domain --db_server=$ARTIFAKT_MYSQL_HOST --db_name=$ARTIFAKT_MYSQL_DATABASE_NAME --db_user=$ARTIFAKT_MYSQL_USER --db_password=$ARTIFAKT_MYSQL_PASSWORD --language=fr --prefix=$prefix --name=$PRESTASHOP_PROJECT_NAME"               
         else         
-            su www-data -s /bin/bash -c "php index_cli.php --step=all --domain=$server_domain --db_server=$ARTIFAKT_MYSQL_HOST --db_name=$ARTIFAKT_MYSQL_DATABASE_NAME --db_user=$ARTIFAKT_MYSQL_USER --db_password=$ARTIFAKT_MYSQL_PASSWORD --language=fr --prefix='pylones_' --name=$PRESTASHOP_PROJECT_NAME --firstname=Iceberg --lastname=Slim --password=ABAree8she --email=bruno.pinchede@artifakt.io --db_create=0"
+            su www-data -s /bin/bash -c "php index_cli.php --step=all --domain=$server_domain --db_server=$ARTIFAKT_MYSQL_HOST --db_name=$ARTIFAKT_MYSQL_DATABASE_NAME --db_user=$ARTIFAKT_MYSQL_USER --db_password=$ARTIFAKT_MYSQL_PASSWORD --language=fr --prefix='pylones_' --name=$PRESTASHOP_PROJECT_NAME --db_create=0"
         fi
 else 
     echo "No install folder.Prestashop seems to be already ready."
@@ -145,7 +145,13 @@ fi
 
 if [ -d "/var/www/code/install" ]; then rm -rf /var/www/code/install; fi
 
+
+echo "######################################################"
+echo "##### Parameters configuration"
+echo "######################################################"
+
 if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
+### parameters.php needs to be shared between all host machines to give an unique accesss to the back office ###
     if [ ! -f "/data/parameters.php" ];then 
         cp -f "$APP_ROOT_PATH/app/config/parameters.php" /data/
         chown www:data:www-data /data/parameters.php
