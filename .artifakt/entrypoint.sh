@@ -159,6 +159,7 @@ if [ "$ARTIFAKT_IS_MAIN_INSTANCE" == 1 ]; then
 fi
 
 cd "$APP_ROOT_PATH/app/config" || exit  
+rm "$APP_ROOT_PATH/app/config/parameters.php"
 ln -s /data/parameters.php parameters.php
 chown -h www-data:www-data parameters.php
 cd $APP_ROOT_PATH || exit
